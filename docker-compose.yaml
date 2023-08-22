@@ -1,0 +1,59 @@
+version: '3.9'
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    volumes:
+      - ./data/kafka:/var/run/docker.sock
+    environment:
+      - KAFKA_ADVERTISED_HOST_NAME=kafka
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 
+      - KAFKA_CREATE_TOPICS=topic1
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - db
+      - redis
+      - kafka
+  ms-email:
+    build: ./ms-email
+    volumes:
+      - ./ms-email:/app
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - kafka
+
+  db:
+    image: mysql:8
+    #    platform: linux/x86_64 #for m1 chip macs
+    restart: always
+    environment:
+      MYSQL_DATABASE: ambassador
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - .dbdata:/var/lib/mysql
+    ports:
+      - "33066:3306"
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  
+networks:
+  node-embassador:
+    driver: bridge
