@@ -28,6 +28,7 @@ services:
       - db
       - redis
       - kafka
+
   ms-email:
     build: ./ms-email
     volumes:
@@ -36,6 +37,27 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       - kafka
+
+  ms-users:
+    build: ./ms-users
+    volumes:
+      - ./ms-users:/app
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db-users
+  
+  db-users:
+    image: mysql:8
+    #    platform: linux/x86_64 #for m1 chip macs
+    restart: always
+    environment:
+      MYSQL_DATABASE: users
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - .dbusers:/var/lib/mysql
 
   db:
     image: mysql:8

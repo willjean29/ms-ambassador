@@ -37,4 +37,4 @@ const run = async () => {
   })
 }
 
-run().then(console.error)
+run().then(console.error);

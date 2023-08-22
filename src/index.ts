@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
-import {createConnection} from "typeorm";
-import {routes} from "./routes";
+import { createConnection } from "typeorm";
+import { routes } from "./routes";
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
-import {createClient} from "redis";
+import { createClient } from "redis";
 
 dotenv.config();
 
@@ -27,7 +27,7 @@ createConnection().then(async () => {
     routes(app);
 
     app.listen(8000, () => {
-        console.log('listening to port 8000')
+        console.log('listening to port 8000');
     });
 });
 
