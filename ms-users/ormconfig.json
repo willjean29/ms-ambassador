@@ -1,10 +1,10 @@
 {
   "type": "mysql",
-  "host": "db",
+  "host": "db-users",
   "port": 3306,
   "username": "root",
   "password": "root",
-  "database": "ambassador",
+  "database": "users",
   "synchronize": true,
   "logging": false,
   "entities": [
