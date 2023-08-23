@@ -62,6 +62,29 @@ services:
       - .dbusers:/var/lib/mysql
     ports:
       - "33065:3306"
+  
+  ms-admin:
+    build: ./ms-admin
+    volumes:
+      - ./ms-admin:/app
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8002:8000"
+    depends_on:
+      - db-users
+
+  db-admin:
+    image: mysql:8
+    #    platform: linux/x86_64 #for m1 chip macs
+    restart: always
+    environment:
+      MYSQL_DATABASE: admin
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - .dbadmin:/var/lib/mysql
+    ports:
+      - "33064:3306"
 
   db:
     image: mysql:8
