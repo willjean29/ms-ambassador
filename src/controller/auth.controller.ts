@@ -1,23 +1,21 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
-import { User } from "../entity/user.entity";
-import bcryptjs from 'bcryptjs';
-import { sign, verify } from "jsonwebtoken";
 import { Order } from "../entity/order.entity";
-import axios from 'axios'
+
+import { UserService } from "../services/user.service";
 export const Register = async (req: Request, res: Response) => {
     const body = req.body
-    const response = await axios.post('http://host.docker.internal:8001/api/register', {
+    const user = await UserService.post('register', {
         ...body,
         is_ambassador: req.path === '/api/ambassador/register'
     });
 
-    res.send(response.data);
+    res.send(user);
 }
 
 export const Login = async (req: Request, res: Response) => {
     const body = req.body
-    const { data } = await axios.post('http://host.docker.internal:8001/api/login', {
+    const data = await UserService.post('login', {
         ...body,
         scope: req.path === '/api/admin/login' ? 'admin' : 'ambassador'
     });
@@ -54,11 +52,7 @@ export const AuthenticatedUser = async (req: Request, res: Response) => {
 
 export const Logout = async (req: Request, res: Response) => {
     const jwt = req.cookies['jwt'];
-    await axios.post('http://host.docker.internal:8001/api/logout', {}, {
-        headers: {
-            'Cookie': `jwt=${jwt}`
-        }
-    });
+    await UserService.post('logout', {}, jwt);
     res.cookie("jwt", "", { maxAge: 0 });
     res.send({
         message: 'success'
@@ -67,20 +61,12 @@ export const Logout = async (req: Request, res: Response) => {
 
 export const UpdateInfo = async (req: Request, res: Response) => {
     const jwt = req.cookies['jwt'];
-    const { data } = await axios.put('http://host.docker.internal:8001/api/users/info', req.body, {
-        headers: {
-            'Cookie': `jwt=${jwt}`
-        }
-    });
+    const data = await UserService.put('users/info', req.body, jwt);
     res.send(data);
 }
 
 export const UpdatePassword = async (req: Request, res: Response) => {
     const jwt = req.cookies['jwt'];
-    const { data } = await axios.put('http://host.docker.internal:8001/api/users/password', req.body, {
-        headers: {
-            'Cookie': `jwt=${jwt}`
-        }
-    });
+    const data = await UserService.put('users/password', req.body, jwt);
     res.send(data);
 }
