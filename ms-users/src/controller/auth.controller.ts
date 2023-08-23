@@ -3,6 +3,7 @@ import { getRepository } from "typeorm";
 import { User } from "../entity/user.entity";
 import bcryptjs from 'bcryptjs';
 import { sign } from "jsonwebtoken";
+import { Token } from "../entity/token.entity";
 
 export const Register = async (req: Request, res: Response) => {
   const { password, password_confirm, ...body } = req.body;
@@ -45,6 +46,15 @@ export const Login = async (req: Request, res: Response) => {
     scope: req.body.scope,
   }, process.env.SECRET_KEY);
 
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+  await getRepository(Token).save({
+    user_id: user.id,
+    token: jwt,
+    expired_at: tomorrow
+  })
+
   res.send({
     jwt
   });
@@ -53,4 +63,14 @@ export const Login = async (req: Request, res: Response) => {
 export const AuthenticatedUser = async (req: Request, res: Response) => {
   const user = req["user"];
   res.send(user);
+}
+
+export const Logout = async (req: Request, res: Response) => {
+  const user = req["user"];
+  await getRepository(Token).delete({
+    user_id: user.id
+  });
+  res.send({
+    message: 'success'
+  });
 }
