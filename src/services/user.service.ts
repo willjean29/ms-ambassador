@@ -1,4 +1,5 @@
 import axios, { Method } from "axios";
+import AppError from "../errors/AppError";
 
 export class UserService {
   static async request(method: Method, url: string, data = {}, cookie = "") {
@@ -19,8 +20,9 @@ export class UserService {
 
       return response.data;
     } catch (error) {
-      console.log(error);
-      return error.response.data;
+      const message = error.response.data.message || error.message;
+      const status = error.response.status || error.status
+      throw new AppError(message, status);
     }
   }
 
