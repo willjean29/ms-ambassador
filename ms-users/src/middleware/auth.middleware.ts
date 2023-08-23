@@ -7,15 +7,12 @@ import { Token } from "../entity/token.entity";
 export const AuthMiddleware = async (req: Request, res: Response, next: Function) => {
     try {
         const jwt = req.cookies['jwt'];
-        console.log({ token: jwt })
         const payload = verify(jwt, process.env.SECRET_KEY) as any;
         if (!payload) {
             return res.status(401).send({
                 message: 'unauthenticated'
             });
         }
-
-        // const is_ambassador = req.path.indexOf('api/ambassador') >= 0;
 
         const user = await getRepository(User).findOne(payload.id);
 
@@ -30,13 +27,8 @@ export const AuthMiddleware = async (req: Request, res: Response, next: Function
             });
         }
 
-        // if ((is_ambassador && payload.scope !== 'ambassador') || (!is_ambassador && payload.scope !== 'admin')) {
-        //     return res.status(401).send({
-        //         message: 'unauthorized'
-        //     });
-        // }
-
         req["user"] = user;
+        req["scope"] = payload.scope;
 
         next();
     } catch (e) {

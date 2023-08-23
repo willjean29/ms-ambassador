@@ -6,7 +6,7 @@ import { UserById, Users } from "./controller/user.controller";
 export const routes = (router: Router) => {
   router.post('/api/register', Register);
   router.post('/api/login', Login);
-  router.get('/api/user', AuthMiddleware, AuthenticatedUser);
+  router.get('/api/users/:scope', AuthMiddleware, AuthenticatedUser);
   router.post('/api/logout', AuthMiddleware, Logout);
   router.put('/api/users/info', AuthMiddleware, UpdateInfo);
   router.put('/api/users/password', AuthMiddleware, UpdatePassword);

@@ -62,6 +62,12 @@ export const Login = async (req: Request, res: Response) => {
 
 export const AuthenticatedUser = async (req: Request, res: Response) => {
   const user = req["user"];
+  const scope = req["scope"];
+  if ((req.params.scope === 'ambassador' && scope !== 'ambassador') || (req.params.scope === 'asmin' && scope !== 'admin')) {
+    return res.status(401).send({
+      message: 'unauthorized'
+    });
+  }
   res.send(user);
 }
 
