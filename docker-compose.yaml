@@ -60,6 +60,8 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - .dbusers:/var/lib/mysql
+    ports:
+      - "33065:3306"
 
   db:
     image: mysql:8

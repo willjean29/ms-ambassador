@@ -1,11 +1,12 @@
-import {Request, Response} from "express";
-import {getRepository} from "typeorm";
-import {Link} from "../entity/link.entity";
+import { Request, Response } from "express";
+import { getRepository } from "typeorm";
+import { Link } from "../entity/link.entity";
+import { UserService } from "../services/user.service";
 
 export const Links = async (req: Request, res: Response) => {
     const links = await getRepository(Link).find({
         where: {
-            user: req.params.id
+            user_id: req.params.id
         },
         relations: ['orders', 'orders.order_items']
     });
@@ -17,9 +18,9 @@ export const CreateLink = async (req: Request, res: Response) => {
     const user = req['user'];
 
     const link = await getRepository(Link).save({
-        user,
+        user_id: user.id,
         code: Math.random().toString(36).substring(6),
-        products: req.body.products.map(id => ({id}))
+        products: req.body.products.map(id => ({ id }))
     });
 
     res.send(link);
@@ -29,7 +30,9 @@ export const Stats = async (req: Request, res: Response) => {
     const user = req['user'];
 
     const links = await getRepository(Link).find({
-        where: {user},
+        where: {
+            user_id: user.id
+        },
         relations: ['orders', 'orders.order_items']
     });
 
@@ -45,10 +48,12 @@ export const Stats = async (req: Request, res: Response) => {
 }
 
 export const GetLink = async (req: Request, res: Response) => {
-    res.send(await getRepository(Link).findOne({
+    const link = await getRepository(Link).findOne({
         where: {
             code: req.params.code
         },
-        relations: ['user', 'products']
-    }))
+        relations: ['products']
+    })
+    link['user'] = await UserService.get(`users/${link.user_id}`);
+    res.send(link)
 }

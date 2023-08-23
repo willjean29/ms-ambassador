@@ -6,9 +6,8 @@ import { Product } from "../entity/product.entity";
 import { OrderItem } from "../entity/order-item.entity";
 import Stripe from "stripe";
 import { client } from "../index";
-import { User } from "../entity/user.entity";
-import { createTransport } from "nodemailer";
 import { producer } from "../kafka/config";
+import { UserService } from "../services/user.service";
 
 export const Orders = async (req: Request, res: Response) => {
     const orders = await getRepository(Order).find({
@@ -40,6 +39,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
         });
     }
 
+    const user = await UserService.get(`users/${link.user_id}`);
     const queryRunner = getConnection().createQueryRunner();
 
     try {
@@ -47,8 +47,8 @@ export const CreateOrder = async (req: Request, res: Response) => {
         await queryRunner.startTransaction();
 
         let order = new Order();
-        order.user_id = link.user.id;
-        order.ambassador_email = link.user.email;
+        order.user_id = link.user_id;
+        order.ambassador_email = user.email;
         order.code = body.code;
         order.first_name = body.first_name;
         order.last_name = body.last_name;
@@ -129,9 +129,9 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
 
     await repository.update(order.id, { complete: true });
 
-    const user = await getRepository(User).findOne(order.user_id);
+    const user = await UserService.get(`users/${order.user_id}`);
 
-    await client.zIncrBy('rankings', order.ambassador_revenue, user.name);
+    await client.zIncrBy('rankings', order.ambassador_revenue, user.first_name + ' ' + user.last_name);
 
     const value = JSON.stringify({
         ...order,

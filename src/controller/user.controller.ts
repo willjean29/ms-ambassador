@@ -1,6 +1,4 @@
 import { Request, Response } from "express";
-import { getRepository } from "typeorm";
-import { User } from "../entity/user.entity";
 import { client } from "../index";
 import { UserService } from "../services/user.service";
 
