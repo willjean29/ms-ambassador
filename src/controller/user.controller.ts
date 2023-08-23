@@ -1,12 +1,12 @@
-import {Request, Response} from "express";
-import {getRepository} from "typeorm";
-import {User} from "../entity/user.entity";
-import {client} from "../index";
+import { Request, Response } from "express";
+import { getRepository } from "typeorm";
+import { User } from "../entity/user.entity";
+import { client } from "../index";
+import { UserService } from "../services/user.service";
 
 export const Ambassadors = async (req: Request, res: Response) => {
-    res.send(await getRepository(User).find({
-        is_ambassador: true
-    }));
+    const users = await UserService.get('users');
+    res.send(users.filter(user => user.is_ambassador));
 }
 
 export const Rankings = async (req: Request, res: Response) => {
