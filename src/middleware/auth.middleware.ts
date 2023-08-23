@@ -1,31 +1,19 @@
-import {Request, Response} from "express";
-import {verify} from "jsonwebtoken";
-import {getRepository} from "typeorm";
-import {User} from "../entity/user.entity";
+import { Request, Response } from "express";
+import { verify } from "jsonwebtoken";
+import { getRepository } from "typeorm";
+import { User } from "../entity/user.entity";
+import axios from "axios";
 
 export const AuthMiddleware = async (req: Request, res: Response, next: Function) => {
     try {
         const jwt = req.cookies['jwt'];
+        const { data } = await axios.get('http://host.docker.internal:8001/api/user', {
+            headers: {
+                'Cookie': `jwt=${jwt}`
+            }
+        });
 
-        const payload: any = verify(jwt, process.env.SECRET_KEY);
-
-        if (!payload) {
-            return res.status(401).send({
-                message: 'unauthenticated'
-            });
-        }
-
-        const is_ambassador = req.path.indexOf('api/ambassador') >= 0;
-
-        const user = await getRepository(User).findOne(payload.id);
-
-        if ((is_ambassador && payload.scope !== 'ambassador') || (!is_ambassador && payload.scope !== 'admin')) {
-            return res.status(401).send({
-                message: 'unauthorized'
-            });
-        }
-
-        req["user"] = user;
+        req["user"] = data;
 
         next();
     } catch (e) {

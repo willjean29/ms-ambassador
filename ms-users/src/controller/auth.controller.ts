@@ -49,3 +49,8 @@ export const Login = async (req: Request, res: Response) => {
     jwt
   });
 }
+
+export const AuthenticatedUser = async (req: Request, res: Response) => {
+  const user = req["user"];
+  res.send(user);
+}
