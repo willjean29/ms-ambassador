@@ -66,27 +66,21 @@ export const Logout = async (req: Request, res: Response) => {
 }
 
 export const UpdateInfo = async (req: Request, res: Response) => {
-    const user = req["user"];
-
-    const repository = getRepository(User);
-
-    await repository.update(user.id, req.body);
-
-    res.send(await repository.findOne(user.id));
+    const jwt = req.cookies['jwt'];
+    const { data } = await axios.put('http://host.docker.internal:8001/api/users/info', req.body, {
+        headers: {
+            'Cookie': `jwt=${jwt}`
+        }
+    });
+    res.send(data);
 }
 
 export const UpdatePassword = async (req: Request, res: Response) => {
-    const user = req["user"];
-
-    if (req.body.password !== req.body.password_confirm) {
-        return res.status(400).send({
-            message: "Password's do not match!"
-        })
-    }
-
-    await getRepository(User).update(user.id, {
-        password: await bcryptjs.hash(req.body.password, 10)
+    const jwt = req.cookies['jwt'];
+    const { data } = await axios.put('http://host.docker.internal:8001/api/users/password', req.body, {
+        headers: {
+            'Cookie': `jwt=${jwt}`
+        }
     });
-
-    res.send(user);
+    res.send(data);
 }

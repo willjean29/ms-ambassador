@@ -18,6 +18,7 @@ services:
       - KAFKA_CREATE_TOPICS=topic1
   backend:
     build: .
+    restart: always
     ports:
       - "8000:8000"
     volumes:
@@ -31,6 +32,7 @@ services:
 
   ms-email:
     build: ./ms-email
+    restart: always
     volumes:
       - ./ms-email:/app
     environment:
