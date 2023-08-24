@@ -13,7 +13,7 @@ export const CreateProduct = async (req: Request, res: Response) => {
     await producer.send({
         topic: 'ambassador_topic',
         messages: [{
-            key: "product_created",
+            key: "productCreated",
             value: JSON.stringify(product)
         }]
     });
@@ -34,7 +34,7 @@ export const UpdateProduct = async (req: Request, res: Response) => {
     await producer.send({
         topic: 'ambassador_topic',
         messages: [{
-            key: "product_updated",
+            key: "productUpdated",
             value: JSON.stringify(product)
         }]
     });
@@ -47,7 +47,7 @@ export const DeleteProduct = async (req: Request, res: Response) => {
     await producer.send({
         topic: 'ambassador_topic',
         messages: [{
-            key: "product_deleted",
+            key: "productDeleted",
             value: req.params.id
         }]
     });
