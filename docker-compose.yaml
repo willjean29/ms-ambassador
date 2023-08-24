@@ -59,7 +59,7 @@ services:
       MYSQL_DATABASE: users
       MYSQL_ROOT_PASSWORD: root
     volumes:
-      - .dbusers:/var/lib/mysql
+      - ./data/.dbusers:/var/lib/mysql
     ports:
       - "33065:3306"
   
@@ -72,7 +72,8 @@ services:
     ports:
       - "8002:8000"
     depends_on:
-      - db-users
+      - db-admin
+      - kafka
 
   db-admin:
     image: mysql:8
@@ -82,9 +83,34 @@ services:
       MYSQL_DATABASE: admin
       MYSQL_ROOT_PASSWORD: root
     volumes:
-      - .dbadmin:/var/lib/mysql
+      - ./data/.dbadmin:/var/lib/mysql
     ports:
       - "33064:3306"
+
+
+  ms-ambassador:
+    build: ./ms-ambassador
+    volumes:
+      - ./ms-ambassador:/app
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8003:8000"
+    depends_on:
+      - db-ambassador
+      - redis
+
+  db-ambassador:
+    image: mysql:8
+    #    platform: linux/x86_64 #for m1 chip macs
+    restart: always
+    environment:
+      MYSQL_DATABASE: ambassador
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./data/.dbambassador:/var/lib/mysql
+    ports:
+      - "33063:3306"
 
   db:
     image: mysql:8
@@ -94,7 +120,7 @@ services:
       MYSQL_DATABASE: ambassador
       MYSQL_ROOT_PASSWORD: root
     volumes:
-      - .dbdata:/var/lib/mysql
+      - ./data/.dbdata:/var/lib/mysql
     ports:
       - "33066:3306"
 
