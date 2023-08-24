@@ -1,7 +1,7 @@
 import { Kafka } from 'kafkajs';
 
 export const kafka = new Kafka({
-  clientId: 'ms-admin',
+  clientId: 'ms-ambassador',
   brokers: [process.env.KAFKA_BOOTSTRAP_SERVERS],
 })
 

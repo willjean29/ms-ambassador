@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { createClient } from "redis";
 import AppError from './errors/AppError';
 import { routes } from './routes';
+import { producer } from './kafka/config';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ export const client = createClient({
 });
 
 createConnection().then(async () => {
+  await producer.connect()
   await client.connect();
 
   const app = express();
