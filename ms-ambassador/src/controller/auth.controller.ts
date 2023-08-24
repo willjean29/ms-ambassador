@@ -8,7 +8,7 @@ export const Register = async (req: Request, res: Response, next: NextFunction) 
     try {
         const user = await UserService.post("register", {
             ...body,
-            is_ambassador: req.path === "/api/ambassador/register",
+            is_ambassador: true,
         });
 
         res.send(user);
@@ -22,7 +22,7 @@ export const Login = async (req: Request, res: Response, next: NextFunction) => 
     try {
         const data = await UserService.post("login", {
             ...body,
-            scope: req.path === "/api/admin/login" ? "admin" : "ambassador",
+            scope: "ambassador",
         });
 
         res.cookie("jwt", data.jwt, {
@@ -41,19 +41,14 @@ export const Login = async (req: Request, res: Response, next: NextFunction) => 
 export const AuthenticatedUser = async (req: Request, res: Response, next: NextFunction) => {
     const user = req["user"];
     try {
-        if (req.path === "/api/admin/user") {
-            return res.send(user);
-        }
 
         const orders = await getRepository(Order).find({
             where: {
-                user_id: user.id,
-                complete: true,
-            },
-            relations: ["order_items"],
+                user_id: user.id
+            }
         });
 
-        user.revenue = orders.reduce((s, o) => s + o.ambassador_revenue, 0);
+        user.revenue = orders.reduce((s, o) => s + o.total, 0);
 
         res.send(user);
     } catch (error) {
