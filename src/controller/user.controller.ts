@@ -1,11 +1,5 @@
 import { Request, Response } from "express";
 import { client } from "../index";
-import { UserService } from "../services/user.service";
-
-export const Ambassadors = async (req: Request, res: Response) => {
-    const users = await UserService.get('users');
-    res.send(users.filter(user => user.is_ambassador));
-}
 
 export const Rankings = async (req: Request, res: Response) => {
     const result: string[] = await client.sendCommand(['ZREVRANGEBYSCORE', 'rankings', '+inf', '-inf', 'WITHSCORES']);

@@ -9,22 +9,6 @@ import { client } from "../index";
 import { producer } from "../kafka/config";
 import { UserService } from "../services/user.service";
 
-export const Orders = async (req: Request, res: Response) => {
-    const orders = await getRepository(Order).find({
-        where: { complete: true },
-        relations: ['order_items']
-    });
-
-    res.send(orders.map((order: Order) => ({
-        id: order.id,
-        name: order.name,
-        email: order.email,
-        total: order.total,
-        created_at: order.created_at,
-        order_items: order.order_items
-    })));
-}
-
 export const CreateOrder = async (req: Request, res: Response) => {
     const body = req.body;
 
