@@ -65,12 +65,22 @@ services:
   
   ms-admin:
     build: ./ms-admin
+    command: "npm start"
     volumes:
       - ./ms-admin:/app
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8002:8000"
+    depends_on:
+      - db-admin
+      - kafka
+
+  ms-admin-consumer:
+    build: ./ms-admin
+    command: "npm run consumer"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       - db-admin
       - kafka
@@ -90,12 +100,22 @@ services:
 
   ms-ambassador:
     build: ./ms-ambassador
+    command: "npm start"
     volumes:
       - ./ms-ambassador:/app
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8003:8000"
+    depends_on:
+      - db-ambassador
+      - redis
+
+  ms-ambassador-consumer:
+    build: ./ms-ambassador
+    command: "npm run consumer"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       - db-ambassador
       - redis
