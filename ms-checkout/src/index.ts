@@ -1,20 +1,16 @@
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { createConnection } from "typeorm";
-// import { routes } from "./routes";
+import { routes } from "./routes";
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
-import { createClient } from "redis";
 import AppError from './errors/AppError';
 
 dotenv.config();
 
-export const client = createClient({
-  url: 'redis://redis:6379'
-});
+
 
 createConnection().then(async () => {
-  await client.connect();
 
   const app = express();
 
@@ -25,7 +21,7 @@ createConnection().then(async () => {
     origin: ['http://localhost:3000', 'http://localhost:4000', 'http://localhost:5000']
   }));
 
-  // routes(app);
+  routes(app);
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     const error = new AppError(`Not Found - ${req.originalUrl}`, 404);
