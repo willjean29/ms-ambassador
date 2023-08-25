@@ -5,13 +5,14 @@ import { routes } from "./routes";
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
 import AppError from './errors/AppError';
+import { producer } from './kafka/config';
 
 dotenv.config();
 
 
 
 createConnection().then(async () => {
-
+  await producer.connect();
   const app = express();
 
   app.use(cookieParser());

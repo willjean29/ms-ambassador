@@ -10,12 +10,23 @@ export const Products = async (req: Request, res: Response) => {
 
 export const CreateProduct = async (req: Request, res: Response) => {
     const product = await getRepository(Product).save(req.body)
-    await producer.send({
-        topic: 'ambassador_topic',
-        messages: [{
+    const messages = [
+        {
             key: "productCreated",
             value: JSON.stringify(product)
-        }]
+        }
+    ]
+    await producer.sendBatch({
+        topicMessages: [
+            {
+                topic: 'ambassador_topic',
+                messages
+            },
+            {
+                topic: 'checkout_topic',
+                messages
+            }
+        ]
     });
     res.status(201).send(product);
 }
@@ -30,13 +41,23 @@ export const UpdateProduct = async (req: Request, res: Response) => {
     await repository.update(req.params.id, req.body);
 
     const product = await repository.findOne(req.params.id);
-
-    await producer.send({
-        topic: 'ambassador_topic',
-        messages: [{
+    const messages = [
+        {
             key: "productUpdated",
             value: JSON.stringify(product)
-        }]
+        }
+    ]
+    await producer.sendBatch({
+        topicMessages: [
+            {
+                topic: 'ambassador_topic',
+                messages
+            },
+            {
+                topic: 'checkout_topic',
+                messages
+            }
+        ]
     });
 
     res.status(202).send(product);
@@ -44,12 +65,24 @@ export const UpdateProduct = async (req: Request, res: Response) => {
 
 export const DeleteProduct = async (req: Request, res: Response) => {
     await getRepository(Product).delete(req.params.id);
-    await producer.send({
-        topic: 'ambassador_topic',
-        messages: [{
+    const messages = [
+        {
             key: "productDeleted",
             value: req.params.id
-        }]
+        }
+    ]
+    await producer.sendBatch({
+        topicMessages: [
+            {
+                topic: 'ambassador_topic',
+                messages
+            },
+            {
+                topic: 'checkout_topic',
+                messages
+            }
+        ]
     });
+
     res.status(204).send(null);
 }

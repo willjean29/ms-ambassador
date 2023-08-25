@@ -11,13 +11,23 @@ export const CreateLink = async (req: Request, res: Response) => {
         code: Math.random().toString(36).substring(6),
         products: req.body.products.map(id => ({ id }))
     });
-
-    await producer.send({
-        topic: 'admin_topic',
-        messages: [{
+    const messages = [
+        {
             key: "linkCreated",
             value: JSON.stringify(link)
-        }]
+        }
+    ]
+    await producer.sendBatch({
+        topicMessages: [
+            {
+                topic: "admin_topic",
+                messages
+            },
+            {
+                topic: "checkout_topic",
+                messages
+            }
+        ]
     });
 
     res.send(link);

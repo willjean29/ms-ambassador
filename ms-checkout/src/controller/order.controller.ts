@@ -5,17 +5,15 @@ import { Link } from "../entity/link.entity";
 import { Product } from "../entity/product.entity";
 import { OrderItem } from "../entity/order-item.entity";
 import Stripe from "stripe";
-// import { client } from "../index";
-// import { producer } from "../kafka/config";
 import { UserService } from "../services/user.service";
+import { producer } from "../kafka/config";
 
 export const CreateOrder = async (req: Request, res: Response) => {
     const body = req.body;
 
-    const link = await getRepository(Link).findOne({
-        where: { code: body.code },
-        relations: ['user']
-    });
+    const link = await getRepository(Link).findOne(
+        { code: body.code }
+    );
 
     if (!link) {
         return res.status(400).send({
@@ -115,24 +113,36 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
 
     const user = await UserService.get(`users/${order.user_id}`);
 
-    // await client.zIncrBy('rankings', order.ambassador_revenue, user.first_name + ' ' + user.last_name);
+    const messages = [
+        {
+            key: 'orderCompleted',
+            value: JSON.stringify({
+                ...order,
+                ambassador_name: user.first_name + ' ' + user.last_name,
+                ambassador_revenue: order.ambassador_revenue,
+                admin_revenue: order.total
+            })
+        }
+    ]
 
-    // const value = JSON.stringify({
-    //     ...order,
-    //     ambassador_revenue: order.ambassador_revenue,
-    //     total: order.total
-    // })
+    await producer.sendBatch({
+        topicMessages: [
+            {
+                topic: 'admin_topic',
+                messages: messages
+            },
+            {
+                topic: 'ambassador_topic',
+                messages: messages
+            },
+            {
+                topic: 'email_topic',
+                messages: messages
+            }
+        ]
+    })
 
-    // await producer.connect()
-
-    // await producer.send({
-    //     topic: 'send-email',
-    //     messages: [
-    //         { value },
-    //     ],
-    // })
-
-    // await producer.disconnect()
+    await producer.disconnect()
 
     res.send({
         message: 'success'
