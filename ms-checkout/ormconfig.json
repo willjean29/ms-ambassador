@@ -1,0 +1,13 @@
+{
+  "type": "mysql",
+  "host": "db-checkout",
+  "port": 3306,
+  "username": "root",
+  "password": "root",
+  "database": "checkout",
+  "synchronize": true,
+  "logging": false,
+  "entities": [
+    "src/entity/*.ts"
+  ]
+}

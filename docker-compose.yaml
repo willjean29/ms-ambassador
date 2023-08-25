@@ -110,6 +110,7 @@ services:
     depends_on:
       - db-ambassador
       - redis
+      - kafka
 
   ms-ambassador-consumer:
     build: ./ms-ambassador
@@ -119,6 +120,7 @@ services:
     depends_on:
       - db-ambassador
       - redis
+      - kafka
 
   db-ambassador:
     image: mysql:8
@@ -131,6 +133,41 @@ services:
       - ./data/.dbambassador:/var/lib/mysql
     ports:
       - "33063:3306"
+
+
+  ms-checkout:
+    build: ./ms-checkout
+    command: "npm start"
+    volumes:
+      - ./ms-checkout:/app
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8004:8000"
+    depends_on:
+      - db-checkout
+      - kafka
+
+  # ms-checkout-consumer:
+  #   build: ./ms-checkout
+  #   command: "npm run consumer"
+  #   environment:
+  #     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  #   depends_on:
+  #     - db-checkout
+  #     - kafka
+
+  db-checkout:
+    image: mysql:8
+    #    platform: linux/x86_64 #for m1 chip macs
+    restart: always
+    environment:
+      MYSQL_DATABASE: checkout
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./data/.dbcheckout:/var/lib/mysql
+    ports:
+      - "33062:3306"
 
   db:
     image: mysql:8
